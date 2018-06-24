@@ -1,9 +1,13 @@
 import React, { Component } from 'react';
 import io from 'socket.io-client';
+import TextField from '../text-field';
+import Button from '../button';
+import UserNickForm from '../user-nick-form';
+import ChatList from './chat-list';
 import styled from 'styled-components';
 
 const ChatForm = styled.form`
-position:absolute;
+position:fixed;
 bottom: 0px;
 left: 0px;
 right: 0px;
@@ -54,27 +58,17 @@ class ChatBox extends Component {
         });
         this.setState({ chatMessage: '' });
     }
-    createUser = (e) => {
-        e.preventDefault();
-        this.initializeSocket(this.userName.value);
-    }
     render() {
-        const chatList = this.state.chats.map((chatObject, index) => <li key={"chat" + index}>{`${chatObject.from} says: ${chatObject.message}`}</li>);
         const createUserNickName = this.state.userNickName === null;
         if (createUserNickName) {
-            return (<form onSubmit={this.createUser}>
-                <input placeholder="Enter a nickname" ref={element => this.userName = element} type="text" />
-                <button type="submit">Done!</button>
-            </form>)
+            return (<UserNickForm onSubmit={this.initializeSocket} />)
         }
         return <div>
-            <ul>
-                {chatList}
-
-            </ul>
+            <h3>Town Square</h3>
+            <ChatList chats={this.state.chats} />
             <ChatForm onSubmit={this.sendMessage}>
-                <input type="text" onChange={this.handleChange} value={this.state.chatMessage} />
-                <button type="submit" disabled={this.state.chatMessage.length == 0} >Send</button>
+                <TextField type="text" onChange={this.handleChange} value={this.state.chatMessage} />
+                <Button type="submit" disabled={this.state.chatMessage.length === 0} >Send</Button>
             </ChatForm>
         </div>
     }
