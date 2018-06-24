@@ -4,6 +4,7 @@ var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 var config = require('./config');
 
+console.log('App running on', config.origin);
 //Allow connections only from deployed domain
 io.origins(config.origin);
 
