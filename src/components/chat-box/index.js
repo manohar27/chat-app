@@ -5,6 +5,7 @@ import Button from '../button';
 import UserNickForm from '../user-nick-form';
 import ChatList from './chat-list';
 import styled from 'styled-components';
+import SearchBar from '../search-box';
 
 const ChatForm = styled.form`
   position: fixed;
@@ -28,44 +29,51 @@ class ChatBox extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      chats: [],
-      chatMessage: '',
-      userNickName: null
+      chatMessage: ''
     };
   }
+  componentDidMount() {
+    if (this.props.nickname) {
+      this.initializeSocket(this.props.nickname);
+    }
+  }
   initializeSocket = userNickName => {
-    this.socket = io(window.location.href);
+    this.socket = io(
+      window.location.href.indexOf('localhost') === -1
+        ? window.location.href
+        : 'http://localhost:3000'
+    );
     this.socket.on('townSquare', message => {
-      const chats = this.state.chats;
-      chats.push(message);
-      this.setState({ chats });
+      this.props.recieveChat(message);
     });
+
     this.socket.emit('townSquare', {
       from: 'ADMIN',
       message: `${userNickName} joined the chat room`
     });
-    this.setState({ userNickName });
+    this.props.createUserNick(userNickName);
   };
 
   handleChange = e => {
     this.setState({ chatMessage: e.target.value });
   };
+
   sendMessage = e => {
     e.preventDefault();
     this.socket.emit('townSquare', {
-      from: this.state.userNickName,
+      from: this.props.nickname,
       message: this.state.chatMessage
     });
     this.setState({ chatMessage: '' });
   };
+
   render() {
-    const createUserNickName = this.state.userNickName === null;
+    const createUserNickName = !this.props.nickname;
     if (createUserNickName) {
       return <UserNickForm onSubmit={this.initializeSocket} />;
     }
     return (
       <div>
-        <ChatList chats={this.state.chats} />
         <ChatForm onSubmit={this.sendMessage}>
           <TextField
             type="text"
