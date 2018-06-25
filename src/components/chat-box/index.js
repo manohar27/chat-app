@@ -74,6 +74,7 @@ class ChatBox extends Component {
     }
     return (
       <div>
+        <ChatList chats={this.props.chats} />
         <ChatForm onSubmit={this.sendMessage}>
           <TextField
             type="text"
